@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>抖小家电商 - 项目工厂 | 孵化与创造各种项目</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+/* ========== 全局与排版（仅中文注释） ========== */
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  color:#333;background:#fff;line-height:1.6;overflow-x:hidden;
+  font-family:'PingFang SC','Microsoft YaHei',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  text-rendering:optimizeLegibility;
+  scroll-behavior: smooth; /* 添加平滑滚动 */
+}
+:root{
+  --primary:#2a6cff;--primary-dark:#1a5ae8;--secondary:#00c9ff;
+  --dark:#2b2f36;--gray:#6c757d;--radius:12px;--shadow:0 8px 24px rgba(0,0,0,.12);
+  --t:all .25s ease;
+}
+.container{width:100%;max-width:1200px;margin:0 auto;padding:0 20px;}
+
+/* ========== 顶部导航（保留登录按钮，但不再有登录/注册逻辑） ========== */
+header{
+  background:rgba(255,255,255,.95);
+  box-shadow:var(--shadow);
+  position:fixed;left:0;right:0;top:0;z-index:1000;
+  backdrop-filter:blur(10px);
+}
+.navbar{
+  display:grid;grid-template-columns:auto 1fr 240px;align-items:center;gap:16px;
+  min-height:72px;
+}
+.logo{display:flex;align-items:center;}
+.logo-icon{
+  width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+  color:#fff;font-weight:700;font-size:20px;background:linear-gradient(135deg,var(--primary),var(--secondary));
+  box-shadow:0 4px 12px rgba(42,108,255,.25);
+}
+.logo h1{font-size:22px;font-weight:700;color:var(--primary);margin-left:10px;line-height:40px;}
+.nav-links{list-style:none;display:flex;justify-content:center;gap:30px;}
+.nav-links a{color:var(--dark);text-decoration:none;font-weight:500;position:relative;transition:var(--t);line-height:40px;}
+.nav-links a:hover{color:var(--primary);}
+.nav-links a.active{color:var(--primary);font-weight:600;}
+.nav-links a.active::after{content:'';position:absolute;left:0;bottom:-8px;height:2px;width:100%;background:var(--primary);}
+
+/* 右侧认证区（仅保留"登录"按钮 + 下拉菜单） */
+.auth-area{position:relative;height:40px;width:240px;justify-self:end;}
+.login-dropdown{
+  position:relative;display:inline-block;
+  /* 中文：关键缓冲带，扩大父容器 hover 区域，覆盖按钮与菜单之间的"空档" */
+  padding-bottom:12px;
+}
+.btn-login{
+  /* 中文：按钮稍微加宽（增加左右内边距 + 最小宽度），提升命中面积与稳定性 */
+  padding:12px 22px;border-radius:999px;font-weight:600;font-size:14px;cursor:pointer;border:2px solid var(--primary);
+  min-width:120px; text-align:center;
+  color:var(--primary);background:#fff;line-height:20px;transition:var(--t);
+}
+.btn-login:hover{background:var(--primary);color:#fff;}
+/* 悬停/点击出现的下拉菜单 —— 贴齐 top:100%，不再使用 translateY，避免产生实际缝隙 */
+.login-menu{
+  position:absolute;top:100%;right:0;min-width:220px;background:#fff;border-radius:10px;
+  box-shadow:0 10px 24px rgba(0,0,0,.12);padding:10px 0;display:none;z-index:1100;
+}
+/* 让"按钮或菜单任一获得 hover/focus-within"都保持展开，PC 端悬停即显，无需点击 */
+.login-dropdown:hover .login-menu,
+.login-dropdown:focus-within .login-menu{display:block;}
+.login-menu a{display:flex;align-items:center;gap:8px;padding:10px 14px;color:#2b2f36;text-decoration:none;font-size:14px;}
+.login-menu a:hover{background:#f5f7fb;}
+
+/* ========== Hero 第一屏 ========== */
+.hero{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;
+  background:linear-gradient(135deg,#f5f9ff 0%,#e8f2ff 100%);color:var(--dark);text-align:center;padding:80px 0 260px;
+}
+.hero::before{
+  content:'';position:absolute;inset:0;background:url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1440 320\"><path fill=\"%232a6cff\" fill-opacity=\"0.05\" d=\"M0,96L48,112C96,128,192,160,288,186.7C384,213,480,235,576,213.3C672,192,768,128,864,128C960,128,1056,192,1152,208C1248,224,1344,192,1392,176L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320,480,320,384,320,288,320,192,320,96,320,48,320L0,320Z\"></path></svg>') bottom/cover no-repeat;
+}
+.hero-content{position:relative;z-index:2;max-width:900px;padding:0 20px;}
+.hero h2{font-size:clamp(2rem,5vw,3.5rem);margin-bottom:20px;line-height:1.18;text-wrap:balance;}
+.hero h2 .line-1,.hero h2 .line-2{display:block;white-space:nowrap;}
+.hero h2 .line-2{margin-top:6px;margin-left:.25em;color:var(--primary);}
+.hero p{font-size:1.25rem;margin-bottom:28px;color:var(--gray);}
+
+/* ========== 第一屏底部五卡片 ========== */
+.floating-projects{position:absolute;left:0;right:0;bottom:20px;}
+.projects-container{display:flex;justify-content:center;flex-wrap:wrap;gap:25px;padding:0 20px;}
+.project-card{
+  background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);transition:var(--t);
+  width:200px;text-align:left;padding:25px 15px 25px;position:relative;
+}
+.project-card:hover{transform:translateY(-8px);box-shadow:0 15px 30px rgba(0,0,0,.15);}
+.project-icon{
+  width:70px;height:70px;margin:0 auto 20px;background:linear-gradient(135deg,#f5f9ff,#e8f2ff);
+  border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--primary);font-size:28px;box-shadow:0 5px 15px rgba(42,108,255,.1);
+}
+.project-content{text-align:left;}
+.project-content h4{font-size:18px;margin-bottom:10px;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.project-content p{color:#5f6b7a;font-size:14px;margin-bottom:15px;text-align:left;}
+
+/* ========== 新增：电商/新媒体任务收发平台一屏（左文右图） ========== */
+.feature-ecom{background:#f8fbff;padding:120px 0 100px;border-top:1px solid #eef3ff;}
+.feature-grid{display:grid;grid-template-columns:1.05fr 0.95fr;gap:48px;align-items:center;}
+.feature-eyebrow{font-size:14px;font-weight:700;color:#2a6cff;letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px;}
+.feature-title{font-size:42px;line-height:1.2;color:#111;margin-bottom:16px;}
+.feature-desc{font-size:18px;color:#5f6b7a;max-width:640px;margin-bottom:26px;}
+.feature-cta{display:flex;gap:12px;align-items:center;}
+.feature-note{margin-top:10px;color:#8a93a3;font-size:14px;}
+
+/* CTA按钮样式 */
+.cta-button{
+  display:inline-block;border:none;cursor:pointer;background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;
+  padding:16px 40px;border-radius:999px;text-decoration:none;font-weight:700;font-size:18px;box-shadow:0 6px 20px rgba(42,108,255,.3);transition:var(--t);
+}
+.cta-button:hover{transform:translateY(-3px);box-shadow:0 12px 25px rgba(42,108,255,.4);}
+.cta-outline{background:#fff;color:var(--primary);border:2px solid var(--primary);box-shadow:none;}
+.cta-outline:hover{background:var(--primary);color:#fff;box-shadow:0 6px 20px rgba(42,108,255,.25);}
+
+/* 右侧双手机造型 */
+.phone-stage{position:relative;height:520px;}
+.phone{position:absolute;width:250px;height:520px;border-radius:36px;background:#fff;border:1px solid #e6ecff;box-shadow:0 20px 40px rgba(42,108,255,.12);padding:16px;overflow:hidden;}
+.phone::before{content:'';position:absolute;top:10px;left:50%;transform:translateX(-50%);width:80px;height:6px;border-radius:3px;background:#e5eaf7;}
+.phone .screen{width:100%;height:100%;border-radius:26px;background:linear-gradient(135deg,#eff5ff,#dfeaff);background-size:cover;background-position:center;}
+.phone.back{left:0;top:30px;transform:rotate(-8deg) translateX(-10px);}
+.phone.front{right:0;bottom:0;transform:rotate(6deg) translateX(10px);}
+
+/* 响应式 */
+@media (max-width:992px){
+  .feature-grid{grid-template-columns:1fr;gap:28px;}
+  .phone-stage{height:420px;}
+  .phone{width:210px;height:420px;border-radius:28px;padding:12px;}
+  .phone .screen{border-radius:22px;}
+  .feature-title{font-size:34px;}
+}
+@media (max-width:768px){
+  .navbar{grid-template-columns:1fr auto;grid-template-areas:"logo auth" "nav nav";}
+  .logo{grid-area:logo;}
+  .nav-links{grid-area:nav;justify-content:center;gap:16px;margin:10px 0 8px;}
+  .auth-area{grid-area:auth;width:200px;}
+  .floating-projects{position:relative;bottom:0;margin-top:20px;}
+  .projects-container{flex-direction:column;align-items:center;gap:16px;}
+  .project-card{width:100%;max-width:320px;}
+  .feature-ecom{padding:80px 0;}
+  .phone-stage{height:380px;}
+  .phone{width:190px;height:380px;}
+}
+
+/* ========== 第二屏 平台优势 & 页脚 ========== */
+footer{ background:#1a2332; color:#fff; padding:80px 0 30px; }
+.footer-content{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:40px; margin-bottom:40px; }
+.footer-column h4{ font-size:18px; margin-bottom:20px; color:#fff; }
+.footer-links{ list-style:none; padding:0; margin:0; }
+.footer-links li{ margin-bottom:12px; }
+.footer-links a{ color:#a0a7b3; text-decoration:none; transition:var(--t); }
+.footer-links a:hover{ color:#fff; }
+.footer-bottom{ text-align:center; padding-top:30px; border-top:1px solid #2a3446; color:#a0a7b3; font-size:14px; }
+
+.advantages{padding:150px 0 100px;background:#fff;}
+.section-header{text-align:center;margin-bottom:60px;}
+.section-header h3{font-size:36px;margin-bottom:15px;color:var(--dark);}
+.section-header p{color:#5f6b7a;max-width:600px;margin:0 auto;}
+.advantages-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:40px;}
+.advantage-item{text-align:center;padding:40px 20px;border-radius:var(--radius);transition:var(--t);}
+.advantage-item:hover{transform:translateY(-8px);box-shadow:var(--shadow);}
+.advantage-icon{width:80px;height:80px;margin:0 auto 25px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;color:var(--primary);box-shadow:var(--shadow);}
+.advantage-item h4{font-size:20px;margin-bottom:15px;color:var(--dark);}
+.advantage-item p{color:#5f6b7a;}
+
+/* ========== 入场动画（仅使用 opacity/transform，避免回流） ========== */
+.a-up{opacity:0;transform:translateY(24px);}
+.a-fade{opacity:0;}
+.in{opacity:1;transform:none;transition:opacity .6s ease, transform .6s ease;}
+.delay-1{transition-delay:.1s;} .delay-2{transition-delay:.2s;} .delay-3{transition-delay:.3s;}
+.delay-4{transition-delay:.4s;} .delay-5{transition-delay:.5s;} .delay-6{transition-delay:.6s;}
+
+/* 备案链接与警徽样式 */
+.beian-link{ color:#a0a7b3; text-decoration:none; }
+.beian-link:hover{ color:#fff; text-decoration:underline; }
+.footer-bottom .police-icon{ display:inline-block; width:16px; height:16px; vertical-align:-3px; margin-right:4px; }
+.footer-bottom .police-icon svg{ width:100%; height:100%; fill:currentColor; color:#a0a7b3; }
+</style>
+</head>
+<body>
+<header>
+  <div class="container">
+    <nav class="navbar">
+      <div class="logo">
+        <div class="logo-icon">抖</div>
+        <h1>抖小家电商</h1>
+      </div>
+      <ul class="nav-links">
+        <li><a href="#" class="active" id="homeLink">首页</a></li>
+        <li><a href="#ecom-platform">项目工厂</a></li>
+        <li><a href="#advantages">关于我们</a></li>
+        <li><a href="#footer">联系我们</a></li>
+      </ul>
+
+      <!-- 右侧登录按钮（PC 悬停即显；移动端点击展开） -->
+      <div class="auth-area" id="authArea">
+        <div class="login-dropdown" id="loginDropdown">
+          <button class="btn-login" id="loginBtn" aria-haspopup="true" aria-expanded="false">登录</button>
+          <div class="login-menu" id="loginMenu" role="menu" aria-label="快捷入口">
+            <a href="#" id="goAgent"><i class="fa-solid fa-sitemap"></i> 代理商工作台</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<!-- 第一屏 -->
+<section class="hero">
+  <div class="hero-content">
+    <h2 class="a-up" id="heroTitle">
+      <span class="line-1">创造项目的工厂</span>
+      <span class="line-2">连接创意与实现</span>
+    </h2>
+    <p class="a-up delay-2" id="heroDesc">我们孵化并管理从电商、短视频到印刷的多元项目生态，为每个想法提供茁壮成长的土壤。</p>
+  </div>
+
+  <div class="floating-projects">
+    <div class="projects-container" id="projectCards">
+      <div class="project-card a-up"><div class="project-icon"><i class="fas fa-shopping-cart"></i></div><div class="project-content"><h4>电商任务收发平台</h4><p>高效匹配电商任务与技能人才</p></div></div>
+      <div class="project-card a-up delay-1"><div class="project-icon"><i class="fas fa-video"></i></div><div class="project-content"><h4>短视频代拍平台</h4><p>连接专业创作者与需求方</p></div></div>
+      <div class="project-card a-up delay-2"><div class="project-icon"><i class="fab fa-tiktok"></i></div><div class="project-content"><h4>TIKTOK任务收发平台</h4><p>专注于TikTok生态的任务分发</p></div></div>
+      <div class="project-card a-up delay-3"><div class="project-icon"><i class="fas fa-microphone"></i></div><div class="project-content"><h4>主播兼职接单平台</h4><p>连接主播与品牌方</p></div></div>
+      <div class="project-card a-up delay-4"><div class="project-icon"><i class="fas fa-print"></i></div><div class="project-content"><h4>印刷业接单平台</h4><p>数字化印刷业务对接</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 电商/新媒体任务收发平台（左文右图） -->
+<section class="feature-ecom" id="ecom-platform">
+  <div class="container">
+    <div class="feature-grid a-up">
+      <!-- 左侧文案区域 -->
+      <div>
+        <div class="feature-eyebrow a-up delay-1">FEATURE</div>
+        <h3 class="feature-title a-up delay-2">新媒体任务收发平台</h3>
+        <p class="feature-desc a-up delay-3">
+          服务于平台电商、新媒体电商、达人、机构的任务收发平台，用户可以自行发布任务并由威客在线接单，
+          实现高效服务的线上对接。
+        </p>
+        <div class="feature-cta a-up delay-4">
+          <a href="#" class="cta-button" id="applyAgentBtn_2">申请代理</a>
+          <a href="#" class="cta-button cta-outline" id="learnMoreBtn_2">了解项目</a>
+        </div>
+      </div>
+
+      <!-- 右侧双手机造型（将两张业务截图替换到下方的 background-image 中） -->
+      <div class="phone-stage a-up delay-3" aria-hidden="true">
+        <div class="phone back a-up delay-4">
+          <div class="screen" style="background-image:url('fabu.JPG');"></div>
+        </div>
+        <div class="phone front a-up delay-5">
+          <div class="screen" style="background-image:url('jiedan.jpeg');"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 第二屏：平台优势 -->
+<section class="advantages" id="advantages">
+  <div class="container">
+    <div class="section-header a-up"><h3>平台优势</h3><p>为什么选择抖小家电商作为您的项目孵化合作伙伴</p></div>
+    <div class="advantages-grid" id="advGrid">
+      <div class="advantage-item a-up"><div class="advantage-icon"><i class="fas fa-rocket"></i></div><h4>成熟孵化体系</h4><p>经过验证的项目孵化流程，确保项目成功落地与持续发展</p></div>
+      <div class="advantage-item a-up delay-1"><div class="advantage-icon"><i class="fas fa-link"></i></div><h4>全链路支持</h4><p>从创意到实现，提供技术、运营、市场等全方位支持</p></div>
+      <div class="advantage-item a-up delay-2"><div class="advantage-icon"><i class="fas fa-chart-line"></i></div><h4>数据驱动决策</h4><p>基于大数据分析，为项目提供科学决策依据和优化方向</p></div>
+      <div class="advantage-item a-up delay-3"><div class="advantage-icon"><i class="fas fa-lightbulb"></i></div><h4>创新技术应用</h4><p>持续引入最新技术，保持项目在行业内的领先地位</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 页脚 -->
+<footer id="footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-column"><h4>抖小家电商</h4><ul class="footer-links"><li><a href="#advantages">关于我们</a></li><li><a href="#ecom-platform">项目工厂</a></li><li><a href="#footer">联系我们</a></li></ul></div>
+      <div class="footer-column"><h4>平台登录</h4><ul class="footer-links"><li><a href="Login.html">代理商工作台</a></li><li><a href="#">管理员工作台</a></li></ul></div>
+      <div class="footer-column"><h4>联系方式</h4><ul class="footer-links"><li><a href="#">邮箱: contact@douxiao.com</a></li><li><a href="#">电话: 400-888-8888</a></li><li><a href="#">地址: 北京市朝阳区科技园区88号</a></li></ul></div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>
+        © 2023 抖小家电商 版权所有 |
+        <a class="beian-link" href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">京ICP备12345678号-1</a> |
+        <a class="beian-link" href="https://www.beian.gov.cn/portal/registerSystemInfo?recordcode=11010502000001" target="_blank" rel="noopener">
+          <span class="police-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 2l7 3v6c0 5-3.8 9.7-7 11-3.2-1.3-7-6-7-11V5l7-3zM7 8.2V11c0 3.7 2.7 7.6 5 9 2.3-1.4 5-5.3 5-9V8.2l-5-2.1-5 2.1z"/>
+              <circle cx="12" cy="12" r="2.2"/>
+            </svg>
+          </span>
+          京公网安备 11010502000001号
+        </a>
+      </p>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ========== 统一"配置区"：三条链接支持直跳 ========== */
+const LINKS = {
+  /* 代理商工作台链接（鼠标移入登录按钮展开后点击跳转） */
+  agentWorkspace: 'Login.html',
+  /* 申请代理链接（"申请代理"按钮直跳） */
+  applyAgent: 'Applyproject.html',
+  /* 了解项目链接（"了解项目"按钮直跳） */
+  learnMore: 'task-system-produce.html'
+};
+
+document.addEventListener('DOMContentLoaded', function(){
+  // ===== DOM 引用 =====
+  const loginBtn = document.getElementById('loginBtn');      // 顶部"登录"按钮（仅作入口展示）
+  const loginMenu = document.getElementById('loginMenu');    // 下拉菜单
+  const loginDropdown = document.getElementById('loginDropdown');
+  const goAgent = document.getElementById('goAgent');        // "代理商工作台"菜单项
+  const homeLink = document.getElementById('homeLink');      // 首页链接
+
+  // ===== PC 端：悬停即显（由 CSS 控制）；移动端（无 hover）启用点击展开 =====
+  const isNoHover = window.matchMedia && window.matchMedia('(hover: none)').matches;
+
+  function openMenu(){ loginMenu.style.display='block'; loginBtn.setAttribute('aria-expanded','true'); }
+  function closeMenu(){ loginMenu.style.display='none'; loginBtn.setAttribute('aria-expanded','false'); }
+
+  if(isNoHover){
+    loginBtn.addEventListener('click', function(e){
+      e.preventDefault();
+      const visible = loginMenu.style.display === 'block';
+      visible ? closeMenu() : openMenu();
+    });
+    document.addEventListener('click', function(e){
+      if (!document.getElementById('authArea').contains(e.target)) closeMenu();
+    });
+    document.addEventListener('keydown', function(e){
+      if (e.key === 'Escape') closeMenu();
+    });
+  }
+
+  // ===== 跳转：代理商工作台 =====
+  goAgent.addEventListener('click', function(e){
+    e.preventDefault();
+    window.location.href = LINKS.agentWorkspace;
+  });
+
+  // ===== CTA 跳转（两个位置各一套按钮，均直跳） =====
+  ['applyAgentBtn_2'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.setAttribute('href', LINKS.applyAgent);
+  });
+  ['learnMoreBtn_2'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.setAttribute('href', LINKS.learnMore);
+  });
+
+  // ===== 为首页链接添加回到顶部功能 =====
+  homeLink.addEventListener('click', function(e) {
+    e.preventDefault();
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  });
+
+  // ===== 为导航链接添加平滑滚动 =====
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    if (anchor !== homeLink) { // 排除首页链接，因为已经单独处理
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        
+        const targetId = this.getAttribute('href');
+        if (targetId === '#') return;
+        
+        const targetElement = document.querySelector(targetId);
+        if (targetElement) {
+          // 计算偏移量，考虑固定导航栏的高度
+          const headerHeight = document.querySelector('header').offsetHeight;
+          const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - headerHeight;
+          
+          window.scrollTo({
+            top: targetPosition,
+            behavior: 'smooth'
+          });
+          
+          // 更新导航栏活动状态
+          document.querySelectorAll('.nav-links a').forEach(link => {
+            link.classList.remove('active');
+          });
+          this.classList.add('active');
+        }
+      });
+    }
+  });
+
+  // ===== 入场动效 =====
+  function animateIn(el){ if(!el) return; requestAnimationFrame(()=>{ el.classList.add('in'); }); }
+  animateIn(document.getElementById('heroTitle'));
+  setTimeout(()=>animateIn(document.getElementById('heroDesc')),120);
+
+  document.querySelectorAll('#projectCards .project-card').forEach((card,i)=>{
+    setTimeout(()=>animateIn(card), 120 + i*80);
+  });
+
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        animateIn(entry.target);
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll('.advantages .a-up, .advantages .a-fade, .feature-ecom, .feature-ecom .a-up').forEach(el=>io.observe(el));
+});
+</script>
+</body>
+</html>
